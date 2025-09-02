@@ -7,11 +7,16 @@ from starlette import status
 from utils import make_token, hash_password, make_uuid4, verify_password, is_valid_uuid
 from db import save_user_to_db, get_user_by_username, get_items_from_db, save_item_in_db
 from models.models import User, UserRole, UserInput, Item
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 import redis
 redis_connection = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 app = FastAPI()
+origins = ['*']
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 async def get_current_session_id(response: Response,session_id: Annotated[str | None, Cookie()]) -> User | None:
