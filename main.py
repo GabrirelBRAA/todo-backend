@@ -89,9 +89,9 @@ async def create_item(item: Item, user: Annotated[User | None, Depends(get_curre
     return item
 
 @app.get("/items/")
-async def list_items(user: Annotated[User | None, Depends(get_current_session_id)], limit: int = 10, offset: int = 0) -> List[Item]:
+async def list_items(user: Annotated[User | None, Depends(get_current_session_id)], limit: int = 10, page: int = 0) -> List[Item]:
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     user_id = user.id
-    items = get_items_from_db(user_id, limit, offset)
+    items = get_items_from_db(user_id, limit, page)
     return items

@@ -54,9 +54,9 @@ def save_item_in_db(item: Item):
         connection.execute(items.insert(), item.model_dump())
         connection.commit()
 
-def get_items_from_db(user_id: str, limit: int = 10, offset: int = 0) -> list[Item]:
+def get_items_from_db(user_id: str, limit: int = 10, page: int = 0) -> list[Item]:
     with engine.connect() as connection:
-        stmt = select(items).where(items.columns.user_id == user_id).limit(limit).offset(offset)
+        stmt = select(items).where(items.columns.user_id == user_id).limit(limit).offset(page * limit)
         result = connection.execute(stmt).all()
         if not result:
             return []
