@@ -36,6 +36,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),)
     if verify_password(form_data.password, user.hash):
         session_id = make_token()
         redis_connection.hset(session_id, mapping=user.model_dump())
+        redis_connection.expire(session_id, 3600)
         response.set_cookie('session_id', session_id, samesite='none', secure=True, expires=3600, httponly=True)
         return {"message": "Login Successs"}
     else:
