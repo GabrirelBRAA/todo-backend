@@ -10,13 +10,12 @@ from models.models import User, UserRole, UserInput, Item
 from fastapi.middleware.cors import CORSMiddleware
 
 
-
 import redis
 redis_connection = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 app = FastAPI()
-origins = ['*']
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
+origins = ['http://localhost:5173']
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 async def get_current_session_id(response: Response,session_id: Annotated[str | None, Cookie()]) -> User | None:
@@ -37,7 +36,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),)
     if verify_password(form_data.password, user.hash):
         session_id = make_token()
         redis_connection.hset(session_id, mapping=user.model_dump())
-        response.set_cookie('session_id', session_id) #set httponly later
+        response.set_cookie('session_id', session_id, samesite='none', secure=True, expires=3600, httponly=True)
         return {"message": "Login Successs"}
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
