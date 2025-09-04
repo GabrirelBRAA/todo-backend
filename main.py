@@ -28,6 +28,12 @@ async def get_current_session_id(response: Response,session_id: Annotated[str | 
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         return User(**user)
 
+@app.post("/logoff", status_code=status.HTTP_204_NO_CONTENT)
+def logoff(response: Response, session_id: Annotated[str | None, Cookie()]):
+    redis_connection.delete(session_id)
+    response.delete_cookie("session_id")
+
+
 @app.post("/login", status_code=status.HTTP_200_OK)
 def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),):
     user = get_user_by_username(form_data.username)
