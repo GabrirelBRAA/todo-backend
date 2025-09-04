@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, text, insert, Table, Column, MetaData, String, Integer, select, ForeignKey
+from sqlalchemy import create_engine, func, insert, Table, Column, MetaData, String, Integer, select, ForeignKey
 from starlette import status
 
 from models.models import User, Item
@@ -54,11 +54,13 @@ def save_item_in_db(item: Item):
         connection.execute(items.insert(), item.model_dump())
         connection.commit()
 
-def get_items_from_db(user_id: str, limit: int = 10, page: int = 0) -> list[Item]:
+def get_items_from_db(user_id: str, limit: int = 10, page: int = 0) -> tuple[list[Item], int]:
     with engine.connect() as connection:
         stmt = select(items).where(items.columns.user_id == user_id).limit(limit).offset(page * limit)
         result = connection.execute(stmt).all()
+        count_stmt = select(func.count()).select_from(items).where(items.columns.user_id == user_id)
+        total_count = connection.execute(count_stmt).scalar_one()
         if not result:
-            return []
+            return [], total_count
         else:
-            return [Item(**dict(item._mapping)) for item in result]
+            return [Item(**dict(item._mapping)) for item in result], total_count
