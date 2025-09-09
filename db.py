@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, func, insert, Table, Column, MetaData, String, Integer, select, ForeignKey, delete
+from sqlalchemy import create_engine, func, insert, Table, Column, MetaData, String, Integer, select, ForeignKey, delete, update
 from starlette import status
 
 from models.models import User, Item
@@ -68,6 +68,13 @@ def get_items_from_db(user_id: str, limit: int = 10, page: int = 0) -> tuple[lis
 def delete_item_from_db_if_exists(item_id: str, user_id: str) -> int:
     with engine.connect() as connection:
         stmt = delete(items).where(items.columns.id == item_id, items.columns.user_id == user_id)
+        result = connection.execute(stmt)
+        connection.commit()
+        return result.rowcount
+
+def update_item_in_db(item_id: str, item: Item, user_id: str) -> int:
+    with engine.connect() as connection:
+        stmt = update(items).where(items.columns.id == item_id, items.columns.user_id == user_id).values(**item.model_dump(exclude_none=True))
         result = connection.execute(stmt)
         connection.commit()
         return result.rowcount
