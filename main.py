@@ -5,7 +5,7 @@ from fastapi import FastAPI, Response, Depends, Cookie, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from starlette import status
 from utils import make_token, hash_password, make_uuid4, verify_password, is_valid_uuid
-from db import save_user_to_db, get_user_by_username, get_items_from_db, save_item_in_db
+from db import save_user_to_db, get_user_by_username, get_items_from_db, save_item_in_db, delete_item_from_db_if_exists
 from models.models import User, UserRole, UserInput, Item
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -102,3 +102,11 @@ async def list_items(user: Annotated[User | None, Depends(get_current_session_id
     user_id = user.id
     items, total_count = get_items_from_db(user_id, limit, page)
     return {'items': items, 'total_count': total_count}
+
+@app.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def list_items(item_id: str, user: Annotated[User | None, Depends(get_current_session_id)]):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    deleted_count = delete_item_from_db_if_exists(item_id, user.id)
+    if deleted_count == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
