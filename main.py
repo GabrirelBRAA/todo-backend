@@ -38,7 +38,7 @@ def logoff(response: Response, session_id: Annotated[str | None, Cookie()]):
 def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),):
     user = get_user_by_username(form_data.username)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid username or password")
     if verify_password(form_data.password, user.hash):
         session_id = make_token()
         redis_connection.hset(session_id, mapping=user.model_dump())
@@ -46,7 +46,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(),)
         response.set_cookie('session_id', session_id, samesite='none', secure=True, expires=3600, httponly=True)
         return {"message": "Login Successs"}
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
 @app.get("/me/")
 async def say_user(session: Annotated[User | None, Depends(get_current_session_id)]):
