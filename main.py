@@ -29,9 +29,10 @@ async def get_current_session_id(response: Response,session_id: Annotated[str | 
         return User(**user)
 
 @app.post("/logoff", status_code=status.HTTP_204_NO_CONTENT)
-def logoff(response: Response, session_id: Annotated[str | None, Cookie()]):
-    redis_connection.delete(session_id)
-    response.delete_cookie("session_id")
+def logoff(response: Response, session_id: Annotated[str | None, Cookie()] = None):
+    if session_id:
+        redis_connection.delete(session_id)
+        response.delete_cookie("session_id")
 
 
 @app.post("/login", status_code=status.HTTP_200_OK)
