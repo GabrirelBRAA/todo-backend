@@ -40,7 +40,12 @@ def save_user_to_db(user: User):
                                                 'username': user.username})
             connection.commit()
     except IntegrityError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str("Username or email already exists."))
+        if "user_unique_email" in str(e):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
+        elif "user_unique" in str(e):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str("Database error."))
 
 def get_user_by_username(username: str) -> User | None:
     with engine.connect() as connection:
