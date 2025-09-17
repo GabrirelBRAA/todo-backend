@@ -74,6 +74,7 @@ async def create_user(user: UserInput):
     new_user = User(**user.model_dump())
     new_user.hash = hashed_password
     new_user.id = make_uuid4()
+    new_user.role = 0 #user role should always be normal for this endpoint
     save_user_to_db(new_user)
     return user
 

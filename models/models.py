@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_serializer, field_validator, Field
+from pydantic import BaseModel, field_serializer, field_validator, Field, EmailStr
 from typing import Literal, Optional
 from custom_types.types import UserRole
 
@@ -7,6 +7,7 @@ class User(BaseModel):
     username: str
     firstname: str
     lastname: str
+    email: Optional[str] = None
     hash: Optional[str] = Field(None, exclude=True)
     role: UserRole | str | int
 
@@ -28,7 +29,8 @@ class UserInput(BaseModel):
     lastname: str
     username: str
     password: str
-    role: Literal["ADMIN", "NORMAL", "SUPERADMIN"] = "NORMAL"
+    email: EmailStr
+    role: Literal[UserRole.NORMAL] = UserRole.NORMAL
 
     @field_validator("password")
     def validate_password(cls, value):

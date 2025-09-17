@@ -13,6 +13,7 @@ users = Table("user",
               Column("id", String, primary_key=True),
               Column("firstname", String),
               Column("lastname", String),
+              Column("email", String),
               Column("role", Integer),
               Column("hash", String),
               Column("username", String),
@@ -27,19 +28,19 @@ items = Table("item",
               )
 
 
-
 def save_user_to_db(user: User):
     try:
         with engine.connect() as connection:
             connection.execute(users.insert(), {'id': user.id,
                                                 'firstname': user.firstname,
                                                 'lastname': user.lastname,
+                                                'email': user.email,
                                                 'role': user.role,
                                                 'hash': user.hash,
                                                 'username': user.username})
             connection.commit()
     except IntegrityError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str("Username already exists."))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str("Username or email already exists."))
 
 def get_user_by_username(username: str) -> User | None:
     with engine.connect() as connection:
