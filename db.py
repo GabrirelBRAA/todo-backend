@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine, func, insert, Table, Column, MetaData, String, Integer, select, ForeignKey, delete, update
 from starlette import status
 
@@ -5,7 +6,8 @@ from models.models import User, Item
 from sqlalchemy.exc import IntegrityError
 from fastapi.exceptions import HTTPException
 
-engine = create_engine("postgresql://postgres:mysecretpassword@localhost:3000/postgres", echo=True)
+engine = create_engine(f"postgresql://postgres:{os.environ["DB_PASS"]}@127.0.0.1:2999/{os.environ["DB_NAME"]}", echo=True)
+#engine = create_engine("postgresql://postgres:mysecretpassword@localhost:3000/postgres", echo=True)
 metadata = MetaData()
 
 users = Table("user",

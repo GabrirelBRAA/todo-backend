@@ -1,5 +1,9 @@
-import secrets
+import os
 from typing import Annotated, List
+
+
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI, Response, Depends, Cookie, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -9,9 +13,8 @@ from db import save_user_to_db, get_user_by_username, get_items_from_db, save_it
 from models.models import User, UserRole, UserInput, Item
 from fastapi.middleware.cors import CORSMiddleware
 
-
 import redis
-redis_connection = redis.Redis(host='localhost', port=6379, decode_responses=True)
+redis_connection = redis.Redis(host='localhost', password=os.environ["REDIS_PASS"], port=6379, decode_responses=True)
 
 app = FastAPI()
 origins = ['http://localhost:5173']
